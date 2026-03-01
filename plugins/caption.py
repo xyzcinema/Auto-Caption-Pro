@@ -7,17 +7,16 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQu
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.exceptions import TelegramBadRequest
+from aiogram.filters import Command
 # CantarellaBots
 # Don't Remove Credit
 # Telegram Channel @CantarellaBots
 #Supoort group @rexbotschat
 from database import (
     is_banned, set_auto_caption, get_auto_caption,
-    set_caption_template, get_caption_template,
-    set_caption_style, get_caption_style,
+    set_caption_format, get_caption_format,
     set_replace_underscores, get_replace_underscores,
-    set_show_extension, get_show_extension,
-    set_caption_position, get_caption_position
+    set_show_extension, get_show_extension
 )
 # CantarellaBots
 # Don't Remove Credit
@@ -31,7 +30,7 @@ router = Router()
 #Supoort group @rexbotschat
 
 class CaptionState(StatesGroup):
-    waiting_for_template = State()
+    waiting_for_caption_format = State()
 
 # CantarellaBots
 # Don't Remove Credit
@@ -51,58 +50,15 @@ def small_caps(text: str) -> str:
             result += char
     return result
 
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
-
 def get_caption_menu_keyboard(auto_caption: bool) -> InlineKeyboardMarkup:
     """Return the caption menu keyboard."""
     status = "✅ ON" if auto_caption else "❌ OFF"
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=f"🤖 Auto Caption: {status}", callback_data="toggle_auto_caption")],
-        [InlineKeyboardButton(text="📝 Caption Template", callback_data="caption_template")],
-        [InlineKeyboardButton(text="🎨 Caption Style", callback_data="caption_style")],
+        [InlineKeyboardButton(text="📝 Set Caption Format", callback_data="set_caption_format_menu")],
         [InlineKeyboardButton(text="🔤 Replace _ to Space", callback_data="caption_underscore")],
         [InlineKeyboardButton(text="📎 Show Extension", callback_data="caption_extension")],
-        [InlineKeyboardButton(text="📍 Caption Position", callback_data="caption_position")],
-        [InlineKeyboardButton(text="👁️ Preview Caption", callback_data="preview_caption")],
         [InlineKeyboardButton(text="🔙 Back to Settings", callback_data="settings")],
-    ])
-
-def get_style_keyboard(current_style: str) -> InlineKeyboardMarkup:
-    """Return style selection keyboard."""
-    styles = [
-        ("📝 Normal", "normal"),
-        ("𝗕 Bold", "bold"),
-        ("𝚃𝚎𝚡𝚝 Mono", "mono"),
-        ("𝗠𝗼𝗻𝗼 Bold+Mono", "bold_mono")
-    ]
-    buttons = []
-    for label, style in styles:
-        mark = "✅ " if current_style == style else ""
-        buttons.append([InlineKeyboardButton(text=f"{mark}{label}", callback_data=f"set_style_{style}")])
-    buttons.append([InlineKeyboardButton(text="🔙 Back", callback_data="caption_settings")])
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-def get_position_keyboard(current_position: str) -> InlineKeyboardMarkup:
-    """Return position selection keyboard."""
-    positions = [
-        ("🔄 Replace Original", "replace"),
-        ("⬆️ Before Original", "before"),
-        ("⬇️ After Original", "after")
-    ]
-    buttons = []
-    for label, position in positions:
-        mark = "✅ " if current_position == position else ""
-        buttons.append([InlineKeyboardButton(text=f"{mark}{label}", callback_data=f"set_position_{position}")])
-    buttons.append([InlineKeyboardButton(text="🔙 Back", callback_data="caption_settings")])
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-def get_template_help_keyboard() -> InlineKeyboardMarkup:
-    """Return template help keyboard."""
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="✅ Done", callback_data="caption_settings")],
     ])
 
 def get_underscore_keyboard(enabled: bool) -> InlineKeyboardMarkup:
@@ -121,16 +77,6 @@ def get_extension_keyboard(enabled: bool) -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text="🔙 Back", callback_data="caption_settings")],
     ])
 
-def apply_style(text: str, style: str) -> str:
-    """Apply text style formatting."""
-    if style == "bold":
-        return f"<b>{text}</b>"
-    elif style == "mono":
-        return f"<code>{text}</code>"
-    elif style == "bold_mono":
-        return f"<b><code>{text}</code></b>"
-    return text
-
 def format_filename(filename: str, replace_underscores: bool, show_extension: bool) -> str:
     """Format filename according to settings."""
     if not filename:
@@ -147,31 +93,14 @@ def format_filename(filename: str, replace_underscores: bool, show_extension: bo
     
     return filename
 
-def generate_caption(template: str, filename: str, original_caption: str, 
-                     replace_underscores: bool, show_extension: bool, 
-                     style: str, position: str) -> str:
-    """Generate the final caption based on template and settings."""
+def generate_caption(caption_format: str, filename: str, 
+                     replace_underscores: bool, show_extension: bool) -> str:
+    """Generate the final caption based on format and settings."""
     # Format the filename
     formatted_filename = format_filename(filename, replace_underscores, show_extension)
     
-    # Apply style to filename
-    styled_filename = apply_style(formatted_filename, style)
-    
-    # Replace template variables
-    caption = template.replace("{filename}", styled_filename)
-    caption = caption.replace("{original}", original_caption or "")
-    
-    # Handle position
-    if position == "replace":
-        return caption
-    elif position == "before":
-        if original_caption:
-            return f"{caption}\n\n{original_caption}"
-        return caption
-    elif position == "after":
-        if original_caption:
-            return f"{original_caption}\n\n{caption}"
-        return caption
+    # Replace {filename} with the formatted filename
+    caption = caption_format.replace("{filename}", formatted_filename)
     
     return caption
 
@@ -190,17 +119,16 @@ async def show_caption_settings(callback: CallbackQuery, bot: Bot):
         return
     
     auto_caption = await get_auto_caption(user_id)
+    caption_format = await get_caption_format(user_id)
     
     text = (
         f"<b>📝 {small_caps('Auto Caption Settings')}</b>\n\n"
         f"<blockquote>"
         f"🤖 {small_caps('Auto Caption')}: {'✅ ON' if auto_caption else '❌ OFF'}\n"
-        f"🔤 {small_caps('Replace _ with spaces')}\n"
-        f"📎 {small_caps('Show full filename')}\n"
-        f"🎨 {small_caps('Custom styles: Bold/Mono')}\n"
-        f"📍 {small_caps('Position: Before/After/Replace')}"
-        f"</blockquote>\n\n"
-        f"{small_caps('Choose an option below:')}"
+        f"📝 {small_caps('Format')}: <code>{caption_format}</code>\n\n"
+        f"💡 {small_caps('Use')} <code>/setcaption</code> {small_caps('to set format')}\n"
+        f"💡 {small_caps('Example:')} <code>/setcaption &lt;b&gt;{{filename}}&lt;/b&gt;</code>"
+        f"</blockquote>"
     )
     
     try:
@@ -228,32 +156,41 @@ async def toggle_auto_caption_handler(callback: CallbackQuery, bot: Bot):
     await show_caption_settings(callback, bot)
     await callback.answer(f"Auto Caption {'enabled' if new_state else 'disabled'}!")
 
-@router.callback_query(F.data == "caption_template")
-async def show_template_info(callback: CallbackQuery, bot: Bot):
-    """Show caption template information."""
+@router.callback_query(F.data == "set_caption_format_menu")
+async def show_set_caption_format(callback: CallbackQuery, bot: Bot):
+    """Show how to set caption format."""
     user_id = callback.from_user.id
-    template = await get_caption_template(user_id)
+    current_format = await get_caption_format(user_id)
     
     text = (
-        f"<b>📝 {small_caps('Caption Template')}</b>\n\n"
+        f"<b>📝 {small_caps('Set Caption Format')}</b>\n\n"
+        f"<b>{small_caps('Current Format:')}</b>\n"
+        f"<blockquote><code>{current_format}</code></blockquote>\n\n"
+        f"<b>📌 {small_caps('Available Variable:')}</b>\n"
+        f"<blockquote><code>{{filename}}</code> - {small_caps('Video filename')}</blockquote>\n\n"
+        f"<b>🎨 {small_caps('HTML Tags Supported:')}</b>\n"
         f"<blockquote>"
-        f"{small_caps('Current Template:')}\n"
-        f"<code>{template}</code>"
-        f"</blockquote>\n\n"
-        f"<b>📌 {small_caps('Available Variables:')}</b>\n"
-        f"<blockquote>"
-        f"<code>{{filename}}</code> - {small_caps('Video filename')}\n"
-        f"<code>{{original}}</code> - {small_caps('Original caption')}\n"
+        f"<code>&lt;b&gt;text&lt;/b&gt;</code> - <b>Bold</b>\n"
+        f"<code>&lt;i&gt;text&lt;/i&gt;</code> - <i>Italic</i>\n"
+        f"<code>&lt;code&gt;text&lt;/code&gt;</code> - <code>Mono</code>\n"
+        f"<code>&lt;u&gt;text&lt;/u&gt;</code> - <u>Underline</u>\n"
+        f"<code>&lt;s&gt;text&lt;/s&gt;</code> - <s>Strikethrough</s>\n"
+        f"<code>&lt;a href='url'&gt;text&lt;/a&gt;</code> - {small_caps('Link')}\n"
+        f"<code>&lt;spoiler&gt;text&lt;/spoiler&gt;</code> - {small_caps('Spoiler')}\n"
         f"</blockquote>\n\n"
         f"<b>💡 {small_caps('Examples:')}</b>\n"
         f"<blockquote>"
-        f"<code>{{filename}}</code> - {small_caps('Just filename')}\n"
-        f"<code>📁 {{filename}}</code> - {small_caps('With emoji')}\n"
-        f"<code>{{filename}}\n\n{{original}}</code> - {small_caps('With original')}\n"
-        f"<code>🎬 {{filename}} | @YourChannel</code> - {small_caps('With channel')}\n"
+        f"<code>/setcaption &lt;b&gt;{{filename}}&lt;/b&gt;</code>\n"
+        f"<code>/setcaption 📁 &lt;code&gt;{{filename}}&lt;/code&gt;</code>\n"
+        f"<code>/setcaption &lt;b&gt;🎬 {{filename}}&lt;/b&gt; | &lt;a href='https://t.me/yourchannel'&gt;Join&lt;/a&gt;</code>\n"
+        f"<code>/setcaption &lt;i&gt;{{filename}}&lt;/i&gt; | Size: 1080p</code>"
         f"</blockquote>\n\n"
-        f"{small_caps('Send new template or click Done:')}"
+        f"{small_caps('Send')} <code>/setcaption &lt;your format&gt;</code> {small_caps('to set')}."
     )
+    
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🔙 Back", callback_data="caption_settings")],
+    ])
     
     try:
         await callback.message.delete()
@@ -263,78 +200,89 @@ async def show_template_info(callback: CallbackQuery, bot: Bot):
     await bot.send_message(
         chat_id=callback.message.chat.id,
         text=text,
-        parse_mode="HTML",
-        reply_markup=get_template_help_keyboard()
-    )
-    await callback.answer()
-
-@router.message(CaptionState.waiting_for_template)
-async def receive_template(message: types.Message, state: FSMContext):
-    """Receive and save new caption template."""
-    user_id = message.from_user.id
-    template = message.text
-    
-    await set_caption_template(user_id, template)
-    await state.clear()
-    
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="⚙️ Caption Settings", callback_data="caption_settings")]
-    ])
-    
-    await message.answer(
-        f"<b>✅ {small_caps('Template Saved!')}</b>\n\n"
-        f"<blockquote><code>{template}</code></blockquote>",
         parse_mode="HTML",
         reply_markup=keyboard
     )
-
-@router.callback_query(F.data == "caption_style")
-async def show_style_menu(callback: CallbackQuery, bot: Bot):
-    """Show caption style menu."""
-    user_id = callback.from_user.id
-    current_style = await get_caption_style(user_id)
-    
-    style_names = {
-        "normal": "Normal",
-        "bold": "Bold",
-        "mono": "Mono",
-        "bold_mono": "Bold + Mono"
-    }
-    
-    text = (
-        f"<b>🎨 {small_caps('Caption Style')}</b>\n\n"
-        f"<blockquote>"
-        f"{small_caps('Current:')} {style_names.get(current_style, 'Normal')}\n\n"
-        f"📝 {small_caps('Normal')}: My Video File\n"
-        f"𝗕 {small_caps('Bold')}: <b>My Video File</b>\n"
-        f"𝚃𝚎𝚡𝚝 {small_caps('Mono')}: <code>My Video File</code>\n"
-        f"𝗠𝗼𝗻𝗼 {small_caps('Bold+Mono')}: <b><code>My Video File</code></b>"
-        f"</blockquote>\n\n"
-        f"{small_caps('Select a style:')}"
-    )
-    
-    try:
-        await callback.message.delete()
-    except TelegramBadRequest:
-        pass
-    
-    await bot.send_message(
-        chat_id=callback.message.chat.id,
-        text=text,
-        parse_mode="HTML",
-        reply_markup=get_style_keyboard(current_style)
-    )
     await callback.answer()
 
-@router.callback_query(F.data.startswith("set_style_"))
-async def set_style_handler(callback: CallbackQuery, bot: Bot):
-    """Set caption style."""
-    user_id = callback.from_user.id
-    style = callback.data.replace("set_style_", "")
+@router.message(Command("setcaption"))
+async def setcaption_cmd(message: types.Message):
+    """Set caption format via command."""
+    user_id = message.from_user.id
     
-    await set_caption_style(user_id, style)
-    await show_style_menu(callback, bot)
-    await callback.answer("Style updated!")
+    if await is_banned(user_id):
+        await message.answer(small_caps("You are banned from using this bot."))
+        return
+    
+    # Get the caption format from command
+    args = message.text.split(" ", 1)
+    
+    if len(args) < 2:
+        # Show current format and help
+        current_format = await get_caption_format(user_id)
+        
+        help_text = (
+            f"<b>📝 {small_caps('Set Caption Format')}</b>\n\n"
+            f"<b>{small_caps('Current Format:')}</b>\n"
+            f"<blockquote><code>{current_format}</code></blockquote>\n\n"
+            f"<b>📌 {small_caps('Usage:')}</b>\n"
+            f"<code>/setcaption &lt;format&gt;</code>\n\n"
+            f"<b>💡 {small_caps('Examples:')}</b>\n"
+            f"<blockquote>"
+            f"<code>/setcaption {{filename}}</code> - {small_caps('Just filename')}\n"
+            f"<code>/setcaption &lt;b&gt;{{filename}}&lt;/b&gt;</code> - {small_caps('Bold filename')}\n"
+            f"<code>/setcaption &lt;code&gt;{{filename}}&lt;/code&gt;</code> - {small_caps('Mono filename')}\n"
+            f"<code>/setcaption 📁 &lt;b&gt;{{filename}}&lt;/b&gt;</code> - {small_caps('With emoji')}\n"
+            f"<code>/setcaption &lt;b&gt;{{filename}}&lt;/b&gt; | &lt;a href='https://t.me/yourchannel'&gt;Join&lt;/a&gt;</code>"
+            f"</blockquote>\n\n"
+            f"<b>🎨 {small_caps('HTML Tags:')}</b> <code>&lt;b&gt;, &lt;i&gt;, &lt;code&gt;, &lt;u&gt;, &lt;s&gt;, &lt;a&gt;, &lt;spoiler&gt;</code>"
+        )
+        
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="⚙️ Caption Settings", callback_data="caption_settings")],
+        ])
+        
+        await message.answer(help_text, parse_mode="HTML", reply_markup=keyboard)
+        return
+    
+    caption_format = args[1].strip()
+    
+    # Validate that {filename} is present
+    if "{filename}" not in caption_format:
+        await message.answer(
+            f"<b>❌ {small_caps('Error!')}</b>\n\n"
+            f"{small_caps('Your caption format must contain')} <code>{{filename}}</code> {small_caps('variable.')}\n\n"
+            f"{small_caps('Example:')} <code>/setcaption &lt;b&gt;{{filename}}&lt;/b&gt;</code>",
+            parse_mode="HTML"
+        )
+        return
+    
+    # Save the caption format
+    await set_caption_format(user_id, caption_format)
+    
+    # Show preview with sample filename
+    sample_filename = "My_Awesome_Video_File.mp4"
+    replace_underscores = await get_replace_underscores(user_id)
+    show_extension = await get_show_extension(user_id)
+    
+    formatted_filename = sample_filename.replace("_", " ") if replace_underscores else sample_filename
+    if not show_extension and "." in formatted_filename:
+        formatted_filename = formatted_filename.rsplit(".", 1)[0]
+    
+    preview = caption_format.replace("{filename}", formatted_filename)
+    
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⚙️ Caption Settings", callback_data="caption_settings")],
+    ])
+    
+    await message.answer(
+        f"<b>✅ {small_caps('Caption Format Saved!')}</b>\n\n"
+        f"<b>{small_caps('Format:')}</b> <code>{caption_format}</code>\n\n"
+        f"<b>{small_caps('Preview:')}</b>\n"
+        f"<blockquote>{preview}</blockquote>",
+        parse_mode="HTML",
+        reply_markup=keyboard
+    )
 
 @router.callback_query(F.data == "caption_underscore")
 async def show_underscore_menu(callback: CallbackQuery, bot: Bot):
@@ -412,97 +360,6 @@ async def toggle_extension_handler(callback: CallbackQuery, bot: Bot):
     await set_show_extension(user_id, not current)
     await show_extension_menu(callback, bot)
     await callback.answer("Setting updated!")
-
-@router.callback_query(F.data == "caption_position")
-async def show_position_menu(callback: CallbackQuery, bot: Bot):
-    """Show caption position menu."""
-    user_id = callback.from_user.id
-    current_position = await get_caption_position(user_id)
-    
-    position_names = {
-        "replace": "Replace Original",
-        "before": "Before Original",
-        "after": "After Original"
-    }
-    
-    text = (
-        f"<b>📍 {small_caps('Caption Position')}</b>\n\n"
-        f"<blockquote>"
-        f"{small_caps('Current:')} {position_names.get(current_position, 'Replace')}\n\n"
-        f"🔄 {small_caps('Replace')}: {small_caps('Replace original caption')}\n"
-        f"⬆️ {small_caps('Before')}: {small_caps('Add before original caption')}\n"
-        f"⬇️ {small_caps('After')}: {small_caps('Add after original caption')}"
-        f"</blockquote>\n\n"
-        f"{small_caps('Select position:')}"
-    )
-    
-    try:
-        await callback.message.delete()
-    except TelegramBadRequest:
-        pass
-    
-    await bot.send_message(
-        chat_id=callback.message.chat.id,
-        text=text,
-        parse_mode="HTML",
-        reply_markup=get_position_keyboard(current_position)
-    )
-    await callback.answer()
-
-@router.callback_query(F.data.startswith("set_position_"))
-async def set_position_handler(callback: CallbackQuery, bot: Bot):
-    """Set caption position."""
-    user_id = callback.from_user.id
-    position = callback.data.replace("set_position_", "")
-    
-    await set_caption_position(user_id, position)
-    await show_position_menu(callback, bot)
-    await callback.answer("Position updated!")
-
-@router.callback_query(F.data == "preview_caption")
-async def preview_caption(callback: CallbackQuery, bot: Bot):
-    """Show caption preview."""
-    user_id = callback.from_user.id
-    
-    template = await get_caption_template(user_id)
-    style = await get_caption_style(user_id)
-    replace_underscores = await get_replace_underscores(user_id)
-    show_extension = await get_show_extension(user_id)
-    position = await get_caption_position(user_id)
-    
-    # Sample filename for preview
-    sample_filename = "My_Awesome_Video_File.mp4"
-    sample_original = "This is the original caption from the video."
-    
-    preview = generate_caption(
-        template, sample_filename, sample_original,
-        replace_underscores, show_extension, style, position
-    )
-    
-    text = (
-        f"<b>👁️ {small_caps('Caption Preview')}</b>\n\n"
-        f"<b>📄 {small_caps('Sample Filename:')}</b> <code>{sample_filename}</code>\n"
-        f"<b>📝 {small_caps('Original Caption:')}</b> <code>{sample_original}</code>\n\n"
-        f"<b>✨ {small_caps('Result:')}</b>\n"
-        f"<blockquote>{preview}</blockquote>"
-    )
-    
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="⚙️ Caption Settings", callback_data="caption_settings")]
-    ])
-    
-    try:
-        await callback.message.delete()
-    except TelegramBadRequest:
-        pass
-    
-    await bot.send_message(
-        chat_id=callback.message.chat.id,
-        text=text,
-        parse_mode="HTML",
-        reply_markup=keyboard
-    )
-    await callback.answer()
 
 # CantarellaBots
 # Don't Remove Credit
