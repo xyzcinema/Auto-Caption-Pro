@@ -43,10 +43,10 @@ class ThumbnailState(StatesGroup):
 def get_settings_keyboard():
     """Return the settings inline keyboard."""
     return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📝 Caption Settings", callback_data="caption_settings")],
         [InlineKeyboardButton(text="🖼️ Update Thumbnail", callback_data="update_thumb")],
         [InlineKeyboardButton(text="👁️ View Thumbnail", callback_data="view_thumb")],
         [InlineKeyboardButton(text="🗑️ Remove Thumbnail", callback_data="remove_thumb")],
-        [InlineKeyboardButton(text="📝 Caption Settings", callback_data="caption_settings")],
         [InlineKeyboardButton(text="🔙 Back", callback_data="back_to_start")],
         [InlineKeyboardButton(text="❌ Close", callback_data="close_settings")]
     ])
@@ -57,7 +57,7 @@ def get_settings_keyboard():
 #Supoort group @rexbotschat
 @router.callback_query(F.data == "settings")
 async def show_settings(callback: CallbackQuery, bot: Bot):
-    """Show settings menu - fast text only."""
+    """Show settings menu - fast tet only."""
     user_id = callback.from_user.id
     
     if await is_banned(user_id):
@@ -67,7 +67,7 @@ async def show_settings(callback: CallbackQuery, bot: Bot):
     thumb = await get_thumbnail(user_id)
     auto_caption = await get_auto_caption(user_id)
     
-    thumb_status = f"✅ {small_caps('Thumbnail is set')}" if thumb else f"❌ {small_caps('No thumbnail set')}"
+    thumb_status = f"✅ {small_caps('Thumbnail Is Set')}" if thumb else f"❌ {small_caps('No thumbnail set')}"
     caption_status = f"✅ {small_caps('Auto Caption ON')}" if auto_caption else f"❌ {small_caps('Auto Caption OFF')}"
     
     text = (
