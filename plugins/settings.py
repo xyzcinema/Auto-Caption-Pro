@@ -53,7 +53,6 @@ def get_settings_keyboard():
         [InlineKeyboardButton(text="🖼️ Update Thumbnail", callback_data="update_thumb")],
         [InlineKeyboardButton(text="👁️ View Thumbnail", callback_data="view_thumb")],
         [InlineKeyboardButton(text="🗑️ Remove Thumbnail", callback_data="remove_thumb")],
-        [InlineKeyboardButton(text="📝 Auto Caption", callback_data="caption_settings")],
         [InlineKeyboardButton(text="🔙 Back", callback_data="back_to_start")],
         [InlineKeyboardButton(text="❌ Close", callback_data="close_settings")]
     ])
@@ -73,6 +72,7 @@ async def show_settings(callback: CallbackQuery, bot: Bot):
     
     thumb = await get_thumbnail(user_id)
     status = f"✅ {small_caps('Thumbnail is set')}" if thumb else f"❌ {small_caps('No thumbnail set')}"
+    
     text = (
         f"<b>⚙️ {small_caps('Thumbnail Settings')}</b>\n\n"
         f"<blockquote>{status}</blockquote>\n\n"
