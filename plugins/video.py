@@ -113,23 +113,17 @@ async def handle_video(message: types.Message, bot: Bot):
     # Get user's thumbnail
     thumb_file_id = await get_thumbnail(user_id)
     
-    # Build keyboard
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="⚙️ Settings", callback_data="settings")]
-    ])
-    
     if thumb_file_id:
         # Increment usage count
         await increment_usage(user_id)
         
-        # Send video with custom cover
+        # Send video with custom cover (no settings button)
         await bot.send_video(
             chat_id=message.chat.id,
             video=video.file_id,
             caption=final_caption,
             parse_mode="HTML",
-            cover=thumb_file_id,
-            reply_markup=keyboard
+            cover=thumb_file_id
         )
         
         # Log video to log channel
@@ -149,6 +143,9 @@ async def handle_video(message: types.Message, bot: Bot):
                 pass
     else:
         # No thumbnail set - send warning
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="⚙️ Settings", callback_data="settings")]
+        ])
         await message.answer(
             f"<b>⚠️ {small_caps('No thumbnail set!')}</b>\n\n"
             f"<blockquote>{small_caps('Please set a thumbnail first using Settings.')}</blockquote>",
