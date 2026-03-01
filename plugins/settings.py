@@ -12,7 +12,7 @@ from aiogram.exceptions import TelegramBadRequest
 # Telegram Channel @CantarellaBots
 #Supoort group @rexbotschat
 from config import CHANNEL_URL, DEV_URL
-from database import get_thumbnail, set_thumbnail, remove_thumbnail, is_banned
+from database import get_thumbnail, set_thumbnail, remove_thumbnail, is_banned, get_auto_caption
 # CantarellaBots
 # Don't Remove Credit
 # Telegram Channel @CantarellaBots
@@ -23,6 +23,7 @@ router = Router()
 # Don't Remove Credit
 # Telegram Channel @CantarellaBots
 #Supoort group @rexbotschat
+
 def small_caps(text: str) -> str:
     """Convert text to small caps unicode."""
     normal = "abcdefghijklmnopqrstuvwxyz"
@@ -35,10 +36,6 @@ def small_caps(text: str) -> str:
         else:
             result += char
     return result
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 
 class ThumbnailState(StatesGroup):
     waiting_for_thumbnail = State()
@@ -53,6 +50,7 @@ def get_settings_keyboard():
         [InlineKeyboardButton(text="🖼️ Update Thumbnail", callback_data="update_thumb")],
         [InlineKeyboardButton(text="👁️ View Thumbnail", callback_data="view_thumb")],
         [InlineKeyboardButton(text="🗑️ Remove Thumbnail", callback_data="remove_thumb")],
+        [InlineKeyboardButton(text="📝 Caption Settings", callback_data="caption_settings")],
         [InlineKeyboardButton(text="🔙 Back", callback_data="back_to_start")],
         [InlineKeyboardButton(text="❌ Close", callback_data="close_settings")]
     ])
@@ -71,11 +69,17 @@ async def show_settings(callback: CallbackQuery, bot: Bot):
         return
     
     thumb = await get_thumbnail(user_id)
-    status = f"✅ {small_caps('Thumbnail is set')}" if thumb else f"❌ {small_caps('No thumbnail set')}"
+    auto_caption = await get_auto_caption(user_id)
+    
+    thumb_status = f"✅ {small_caps('Thumbnail is set')}" if thumb else f"❌ {small_caps('No thumbnail set')}"
+    caption_status = f"✅ {small_caps('Auto Caption ON')}" if auto_caption else f"❌ {small_caps('Auto Caption OFF')}"
     
     text = (
         f"<b>⚙️ {small_caps('Thumbnail Settings')}</b>\n\n"
-        f"<blockquote>{status}</blockquote>\n\n"
+        f"<blockquote>"
+        f"{thumb_status}\n"
+        f"{caption_status}"
+        f"</blockquote>\n\n"
         f"{small_caps('Choose an option below:')}"
     )
     
