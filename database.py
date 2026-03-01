@@ -1,21 +1,8 @@
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 from motor.motor_asyncio import AsyncIOMotorClient
 from typing import Optional, List, Dict, Any
 from config import MONGO_URL, DB_NAME, OWNER_ID
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
-# MongoDB client (initialized in main.py)
 client: AsyncIOMotorClient = None
 db = None
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 
 async def init_db():
     """Initialize MongoDB connection."""
@@ -31,20 +18,12 @@ async def init_db():
     await add_admin(OWNER_ID)
     print("✅ MongoDB connected")
 
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 async def close_db():
     """Close MongoDB connection."""
     global client
     if client:
         client.close()
 
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 # ==================== USER FUNCTIONS ====================
 
 async def add_user(user_id: int, username: str = None, first_name: str = None):
@@ -60,19 +39,33 @@ async def add_user(user_id: int, username: str = None, first_name: str = None):
                 "user_id": user_id,
                 "thumbnail_file_id": None,
                 "usage_count": 0,
-                "banned": False,
-                "auto_caption_enabled": False,
-                "caption_format": "{filename}",
-                "replace_underscores": True,
-                "show_extension": True
+                "banned": False
             }
         },
         upsert=True
     )
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
+    # Ensure user has caption fields (for existing users)
+    await ensure_user_caption_fields(user_id)
+
+async def ensure_user_caption_fields(user_id: int):
+    """Ensure user has all caption-related fields with default values."""
+    user = await db.users.find_one({"user_id": user_id})
+    if user:
+        updates = {}
+        if "auto_caption_enabled" not in user:
+            updates["auto_caption_enabled"] = False
+        if "caption_format" not in user:
+            updates["caption_format"] = "{filename}"
+        if "replace_underscores" not in user:
+            updates["replace_underscores"] = True
+        if "show_extension" not in user:
+            updates["show_extension"] = True
+        
+        if updates:
+            await db.users.update_one(
+                {"user_id": user_id},
+                {"$set": updates}
+            )
 
 async def get_user(user_id: int) -> Optional[Dict[str, Any]]:
     """Get user data."""
@@ -93,11 +86,7 @@ async def get_all_users() -> List[Dict[str, Any]]:
 async def get_user_count() -> int:
     """Get total user count."""
     return await db.users.count_documents({})
-
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
+    
 # ==================== THUMBNAIL FUNCTIONS ====================
 
 async def set_thumbnail(user_id: int, file_id: str):
@@ -106,19 +95,10 @@ async def set_thumbnail(user_id: int, file_id: str):
         {"user_id": user_id},
         {"$set": {"thumbnail_file_id": file_id}}
     )
-
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 async def get_thumbnail(user_id: int) -> Optional[str]:
     """Get user's thumbnail file_id."""
     user = await db.users.find_one({"user_id": user_id})
     return user.get("thumbnail_file_id") if user else None
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschats
 
 async def remove_thumbnail(user_id: int) -> bool:
     """Remove user's thumbnail."""
