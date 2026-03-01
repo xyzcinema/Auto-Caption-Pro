@@ -198,7 +198,7 @@ async def receive_thumbnail(message: types.Message, state: FSMContext):
     ])
     
     await message.answer(
-        f"<b>✅ {small_caps('Thumbnail saved!')}</b>\n\n"
+        f"<b>✅ {small_caps('Thumbnail Saved!')}</b>\n\n"
         f"<blockquote>{small_caps('Your videos will now use this cover image.')}</blockquote>",
         parse_mode="HTML",
         reply_markup=keyboard
@@ -288,6 +288,44 @@ async def close_settings(callback: CallbackQuery):
     except TelegramBadRequest:
         pass
     await callback.answer(small_caps("Settings closed"))
+
+# CantarellaBots
+# Don't Remove Credit
+# Telegram Channel @CantarellaBots
+#Supoort group @rexbotschat
+
+# ==================== AUTO THUMBNAIL UPDATE ====================
+# When user sends a photo (not in any state), auto-update their thumbnail
+
+@router.message(F.photo)
+async def auto_update_thumbnail(message: types.Message, state: FSMContext):
+    """Automatically update thumbnail when user sends a photo."""
+    # Check if we're in the waiting_for_thumbnail state
+    current_state = await state.get_state()
+    if current_state == ThumbnailState.waiting_for_thumbnail:
+        # Let the existing handler handle it
+        return
+    
+    user_id = message.from_user.id
+    username = message.from_user.username
+    first_name = message.from_user.first_name
+    
+    # Check if banned
+    if await is_banned(user_id):
+        await message.answer(small_caps("You are banned from using this bot."))
+        return
+    
+    # Get the photo file_id (highest quality)
+    file_id = message.photo[-1].file_id
+    
+    # Save as thumbnail
+    await set_thumbnail(user_id, file_id)
+    
+    await message.answer(
+        f"<b>✅ {small_caps('Thumbnail Saved!')}</b>\n\n"
+        f"<blockquote>{small_caps('Your videos will now use this cover image.')}</blockquote>",
+        parse_mode="HTML"
+    )
 # CantarellaBots
 # Don't Remove Credit
 # Telegram Channel @CantarellaBots
