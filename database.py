@@ -60,7 +60,10 @@ async def add_user(user_id: int, username: str = None, first_name: str = None):
                 "user_id": user_id,
                 "thumbnail_file_id": None,
                 "usage_count": 0,
-                "banned": False
+                "banned": False,
+                "auto_caption_enabled": False,
+                "caption_style": "default",
+                "custom_caption": ""
             }
         },
         upsert=True
@@ -181,6 +184,48 @@ async def is_banned(user_id: int) -> bool:
     """Check if user is banned."""
     user = await db.users.find_one({"user_id": user_id})
     return user.get("banned", False) if user else False
+
+# CantarellaBots
+# Don't Remove Credit
+# Telegram Channel @CantarellaBots
+#Supoort group @rexbotschat
+# ==================== AUTO CAPTION FUNCTIONS ====================
+
+async def get_auto_caption_enabled(user_id: int) -> bool:
+    """Check if auto caption is enabled for user."""
+    user = await db.users.find_one({"user_id": user_id})
+    return user.get("auto_caption_enabled", False) if user else False
+
+async def set_auto_caption_enabled(user_id: int, enabled: bool):
+    """Set auto caption enabled status."""
+    await db.users.update_one(
+        {"user_id": user_id},
+        {"$set": {"auto_caption_enabled": enabled}}
+    )
+
+async def get_caption_style(user_id: int) -> str:
+    """Get user's caption style."""
+    user = await db.users.find_one({"user_id": user_id})
+    return user.get("caption_style", "default") if user else "default"
+
+async def set_caption_style(user_id: int, style: str):
+    """Set user's caption style."""
+    await db.users.update_one(
+        {"user_id": user_id},
+        {"$set": {"caption_style": style}}
+    )
+
+async def get_custom_caption(user_id: int) -> str:
+    """Get user's custom caption template."""
+    user = await db.users.find_one({"user_id": user_id})
+    return user.get("custom_caption", "") if user else ""
+
+async def set_custom_caption(user_id: int, caption: str):
+    """Set user's custom caption template."""
+    await db.users.update_one(
+        {"user_id": user_id},
+        {"$set": {"custom_caption": caption}}
+    )
 
 # CantarellaBots
 # Don't Remove Credit
