@@ -385,7 +385,7 @@ async def show_underscore_dots_menu(callback: CallbackQuery, bot: Bot):
     text = (
         f"<b>🔹 {small_caps('Replace Underscores to Dots')}</b>\n\n"
         f"<blockquote>"
-        f"{small_caps('When enabled, underscores in filenames will be replaced with dots.')}"\n\n"
+        f"{small_caps('When enabled, underscores in filenames will be replaced with dots.')}\n\n"
         f"{small_caps('Example:')}"
         f"<code>My_Video_File.mp4</code> → <code>My.Video.File.mp4</code>"
         f"</blockquote>\n\n"
