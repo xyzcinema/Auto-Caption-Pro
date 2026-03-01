@@ -62,8 +62,11 @@ async def add_user(user_id: int, username: str = None, first_name: str = None):
                 "usage_count": 0,
                 "banned": False,
                 "auto_caption_enabled": False,
-                "caption_style": "default",
-                "custom_caption": ""
+                "caption_template": "{filename}",
+                "caption_style": "normal",
+                "replace_underscores": True,
+                "show_extension": True,
+                "caption_position": "replace"
             }
         },
         upsert=True
@@ -189,43 +192,79 @@ async def is_banned(user_id: int) -> bool:
 # Don't Remove Credit
 # Telegram Channel @CantarellaBots
 #Supoort group @rexbotschat
-# ==================== AUTO CAPTION FUNCTIONS ====================
+# ==================== CAPTION FUNCTIONS ====================
 
-async def get_auto_caption_enabled(user_id: int) -> bool:
-    """Check if auto caption is enabled for user."""
-    user = await db.users.find_one({"user_id": user_id})
-    return user.get("auto_caption_enabled", False) if user else False
-
-async def set_auto_caption_enabled(user_id: int, enabled: bool):
-    """Set auto caption enabled status."""
+async def set_auto_caption(user_id: int, enabled: bool):
+    """Enable or disable auto caption for user."""
     await db.users.update_one(
         {"user_id": user_id},
         {"$set": {"auto_caption_enabled": enabled}}
     )
 
-async def get_caption_style(user_id: int) -> str:
-    """Get user's caption style."""
+async def get_auto_caption(user_id: int) -> bool:
+    """Get auto caption status for user."""
     user = await db.users.find_one({"user_id": user_id})
-    return user.get("caption_style", "default") if user else "default"
+    return user.get("auto_caption_enabled", False) if user else False
+
+async def set_caption_template(user_id: int, template: str):
+    """Set custom caption template for user."""
+    await db.users.update_one(
+        {"user_id": user_id},
+        {"$set": {"caption_template": template}}
+    )
+
+async def get_caption_template(user_id: int) -> str:
+    """Get user's caption template."""
+    user = await db.users.find_one({"user_id": user_id})
+    return user.get("caption_template", "{filename}") if user else "{filename}"
 
 async def set_caption_style(user_id: int, style: str):
-    """Set user's caption style."""
+    """Set caption style: normal, bold, mono, bold_mono."""
     await db.users.update_one(
         {"user_id": user_id},
         {"$set": {"caption_style": style}}
     )
 
-async def get_custom_caption(user_id: int) -> str:
-    """Get user's custom caption template."""
+async def get_caption_style(user_id: int) -> str:
+    """Get user's caption style."""
     user = await db.users.find_one({"user_id": user_id})
-    return user.get("custom_caption", "") if user else ""
+    return user.get("caption_style", "normal") if user else "normal"
 
-async def set_custom_caption(user_id: int, caption: str):
-    """Set user's custom caption template."""
+async def set_replace_underscores(user_id: int, enabled: bool):
+    """Enable or disable underscore to space replacement."""
     await db.users.update_one(
         {"user_id": user_id},
-        {"$set": {"custom_caption": caption}}
+        {"$set": {"replace_underscores": enabled}}
     )
+
+async def get_replace_underscores(user_id: int) -> bool:
+    """Get underscore replacement status."""
+    user = await db.users.find_one({"user_id": user_id})
+    return user.get("replace_underscores", True) if user else True
+
+async def set_show_extension(user_id: int, enabled: bool):
+    """Enable or disable file extension display."""
+    await db.users.update_one(
+        {"user_id": user_id},
+        {"$set": {"show_extension": enabled}}
+    )
+
+async def get_show_extension(user_id: int) -> bool:
+    """Get file extension display status."""
+    user = await db.users.find_one({"user_id": user_id})
+    return user.get("show_extension", True) if user else True
+
+async def set_caption_position(user_id: int, position: str):
+    """Set caption position: before, after, replace."""
+    await db.users.update_one(
+        {"user_id": user_id},
+        {"$set": {"caption_position": position}}
+    )
+
+async def get_caption_position(user_id: int) -> str:
+    """Get caption position."""
+    user = await db.users.find_one({"user_id": user_id})
+    return user.get("caption_position", "replace") if user else "replace"
 
 # CantarellaBots
 # Don't Remove Credit
