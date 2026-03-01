@@ -14,7 +14,7 @@ import os
 #Supoort group @rexbotschat
 from config import API_TOKEN
 from database import init_db, close_db
-from plugins import start_router, settings_router, video_router, admin_router
+from plugins import start_router, settings_router, video_router, admin_router, caption_router
 # CantarellaBots
 # Don't Remove Credit
 # Telegram Channel @CantarellaBots
@@ -31,6 +31,7 @@ dp.include_router(start_router)
 dp.include_router(settings_router)
 dp.include_router(video_router)
 dp.include_router(admin_router)
+dp.include_router(caption_router)
 # CantarellaBots
 # Don't Remove Credit
 # Telegram Channel @CantarellaBots
