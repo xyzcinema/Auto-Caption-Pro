@@ -53,6 +53,7 @@ def get_settings_keyboard():
         [InlineKeyboardButton(text="🖼️ Update Thumbnail", callback_data="update_thumb")],
         [InlineKeyboardButton(text="👁️ View Thumbnail", callback_data="view_thumb")],
         [InlineKeyboardButton(text="🗑️ Remove Thumbnail", callback_data="remove_thumb")],
+        [InlineKeyboardButton(text="📝 Auto Caption", callback_data="caption_settings")],
         [InlineKeyboardButton(text="🔙 Back", callback_data="back_to_start")],
         [InlineKeyboardButton(text="❌ Close", callback_data="close_settings")]
     ])
