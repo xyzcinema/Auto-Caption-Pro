@@ -127,6 +127,7 @@ async def handle_video(message: types.Message, bot: Bot):
             chat_id=message.chat.id,
             video=video.file_id,
             caption=final_caption,
+            parse_mode="HTML",
             cover=thumb_file_id,
             reply_markup=keyboard
         )
