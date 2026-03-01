@@ -16,7 +16,8 @@ from database import (
     is_banned, set_auto_caption, get_auto_caption,
     set_caption_format, get_caption_format,
     set_replace_underscores, get_replace_underscores,
-    set_show_extension, get_show_extension
+    set_show_extension, get_show_extension,
+    set_replace_underscores_to_dots, get_replace_underscores_to_dots
 )
 # CantarellaBots
 # Don't Remove Credit
@@ -57,6 +58,7 @@ def get_caption_menu_keyboard(auto_caption: bool) -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text=f"🤖 Auto Caption: {status}", callback_data="toggle_auto_caption")],
         [InlineKeyboardButton(text="📝 Set Caption Format", callback_data="set_caption_format_menu")],
         [InlineKeyboardButton(text="🔤 Replace _ to Space", callback_data="caption_underscore")],
+        [InlineKeyboardButton(text="🔹 Replace _ to Dot", callback_data="caption_underscore_dots")],
         [InlineKeyboardButton(text="📎 Show Extension", callback_data="caption_extension")],
         [InlineKeyboardButton(text="🔙 Back to Settings", callback_data="settings")],
     ])
@@ -74,6 +76,14 @@ def get_extension_keyboard(enabled: bool) -> InlineKeyboardMarkup:
     status = "✅ ON" if enabled else "❌ OFF"
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=f"🔄 Toggle: {status}", callback_data="toggle_extension")],
+        [InlineKeyboardButton(text="🔙 Back", callback_data="caption_settings")],
+    ])
+
+def get_underscore_dots_keyboard(enabled: bool) -> InlineKeyboardMarkup:
+    """Return underscore to dots settings keyboard."""
+    status = "✅ ON" if enabled else "❌ OFF"
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f"🔄 Toggle: {status}", callback_data="toggle_underscore_dots")],
         [InlineKeyboardButton(text="🔙 Back", callback_data="caption_settings")],
     ])
 
@@ -365,3 +375,41 @@ async def toggle_extension_handler(callback: CallbackQuery, bot: Bot):
 # Don't Remove Credit
 # Telegram Channel @CantarellaBots
 #Supoort group @rexbotschat
+
+@router.callback_query(F.data == "caption_underscore_dots")
+async def show_underscore_dots_menu(callback: CallbackQuery, bot: Bot):
+    """Show underscore to dots replacement menu."""
+    user_id = callback.from_user.id
+    enabled = await get_replace_underscores_to_dots(user_id)
+
+    text = (
+        f"<b>🔹 {small_caps('Replace Underscores to Dots')}</b>\n\n"
+        f"<blockquote>"
+        f"{small_caps('When enabled, underscores in filenames will be replaced with dots.')}"\n\n"
+        f"{small_caps('Example:')}"
+        f"<code>My_Video_File.mp4</code> → <code>My.Video.File.mp4</code>"
+        f"</blockquote>\n\n"
+        f"{small_caps('Current:')} {'✅ ON' if enabled else '❌ OFF'}"
+    )
+
+    try:
+        await callback.message.delete()
+    except TelegramBadRequest:
+        pass
+
+    await bot.send_message(
+        chat_id=callback.message.chat.id,
+        text=text,
+        parse_mode="HTML",
+        reply_markup=get_underscore_dots_keyboard(enabled)
+    )
+    await callback.answer()
+
+@router.callback_query(F.data == "toggle_underscore_dots")
+async def toggle_underscore_dots_handler(callback: CallbackQuery, bot: Bot):
+    """Toggle underscore to dots replacement."""
+    user_id = callback.from_user.id
+    current = await get_replace_underscores_to_dots(user_id)
+    await set_replace_underscores_to_dots(user_id, not current)
+    await show_underscore_dots_menu(callback, bot)
+    await callback.answer("Setting updated!")
