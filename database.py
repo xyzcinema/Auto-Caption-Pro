@@ -60,6 +60,8 @@ async def ensure_user_caption_fields(user_id: int):
             updates["replace_underscores"] = True
         if "show_extension" not in user:
             updates["show_extension"] = True
+        if "replace_underscores_to_dots" not in user:
+            updates["replace_underscores_to_dots"] = False
         
         if updates:
             await db.users.update_one(
@@ -219,6 +221,18 @@ async def get_show_extension(user_id: int) -> bool:
     """Get file extension display status."""
     user = await db.users.find_one({"user_id": user_id})
     return user.get("show_extension", True) if user else True
+
+async def set_replace_underscores_to_dots(user_id: int, enabled: bool):
+    """Enable or disable underscore to dot replacement."""
+    await db.users.update_one(
+        {"user_id": user_id},
+        {"$set": {"replace_underscores_to_dots": enabled}}
+    )
+
+async def get_replace_underscores_to_dots(user_id: int) -> bool:
+    """Get underscore to dot replacement status."""
+    user = await db.users.find_one({"user_id": user_id})
+    return user.get("replace_underscores_to_dots", False) if user else False
 
 # CantarellaBots
 # Don't Remove Credit
