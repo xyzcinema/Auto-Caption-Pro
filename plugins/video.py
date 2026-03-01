@@ -11,8 +11,8 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from config import LOG_CHANNEL
 from database import (
     get_thumbnail, increment_usage, is_banned, add_user,
-    get_auto_caption, get_caption_template, get_caption_style,
-    get_replace_underscores, get_show_extension, get_caption_position
+    get_auto_caption, get_caption_format,
+    get_replace_underscores, get_show_extension
 )
 # CantarellaBots
 # Don't Remove Credit
@@ -37,16 +37,6 @@ def small_caps(text: str) -> str:
             result += char
     return result
 
-def apply_style(text: str, style: str) -> str:
-    """Apply text style formatting."""
-    if style == "bold":
-        return f"<b>{text}</b>"
-    elif style == "mono":
-        return f"<code>{text}</code>"
-    elif style == "bold_mono":
-        return f"<b><code>{text}</code></b>"
-    return text
-
 def format_filename(filename: str, replace_underscores: bool, show_extension: bool) -> str:
     """Format filename according to settings."""
     if not filename:
@@ -63,31 +53,14 @@ def format_filename(filename: str, replace_underscores: bool, show_extension: bo
     
     return filename
 
-def generate_caption(template: str, filename: str, original_caption: str, 
-                     replace_underscores: bool, show_extension: bool, 
-                     style: str, position: str) -> str:
-    """Generate the final caption based on template and settings."""
+def generate_caption(caption_format: str, filename: str, 
+                     replace_underscores: bool, show_extension: bool) -> str:
+    """Generate the final caption based on format and settings."""
     # Format the filename
     formatted_filename = format_filename(filename, replace_underscores, show_extension)
     
-    # Apply style to filename
-    styled_filename = apply_style(formatted_filename, style)
-    
-    # Replace template variables
-    caption = template.replace("{filename}", styled_filename)
-    caption = caption.replace("{original}", original_caption or "")
-    
-    # Handle position
-    if position == "replace":
-        return caption
-    elif position == "before":
-        if original_caption:
-            return f"{caption}\n\n{original_caption}"
-        return caption
-    elif position == "after":
-        if original_caption:
-            return f"{original_caption}\n\n{caption}"
-        return caption
+    # Replace {filename} with the formatted filename
+    caption = caption_format.replace("{filename}", formatted_filename)
     
     return caption
 
@@ -124,16 +97,14 @@ async def handle_video(message: types.Message, bot: Bot):
     
     if auto_caption_enabled:
         # Get caption settings
-        template = await get_caption_template(user_id)
-        style = await get_caption_style(user_id)
+        caption_format = await get_caption_format(user_id)
         replace_underscores = await get_replace_underscores(user_id)
         show_extension = await get_show_extension(user_id)
-        position = await get_caption_position(user_id)
         
         # Generate new caption
         final_caption = generate_caption(
-            template, video_filename, original_caption,
-            replace_underscores, show_extension, style, position
+            caption_format, video_filename,
+            replace_underscores, show_extension
         )
     else:
         # Keep original caption if auto caption is disabled
