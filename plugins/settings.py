@@ -3,22 +3,9 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQu
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.exceptions import TelegramBadRequest
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 from config import CHANNEL_URL, DEV_URL
 from database import get_thumbnail, set_thumbnail, remove_thumbnail, is_banned, get_auto_caption
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 router = Router()
-
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 
 def small_caps(text: str) -> str:
     """Convert text to small caps unicode."""
@@ -36,10 +23,6 @@ def small_caps(text: str) -> str:
 class ThumbnailState(StatesGroup):
     waiting_for_thumbnail = State()
 
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 def get_settings_keyboard():
     """Return the settings inline keyboard."""
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -51,10 +34,6 @@ def get_settings_keyboard():
         [InlineKeyboardButton(text="❌ Close", callback_data="close_settings")]
     ])
 
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 @router.callback_query(F.data == "settings")
 async def show_settings(callback: CallbackQuery, bot: Bot):
     """Show settings menu - fast tet only."""
@@ -92,11 +71,6 @@ async def show_settings(callback: CallbackQuery, bot: Bot):
         reply_markup=get_settings_keyboard()
     )
     await callback.answer()
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
-
 @router.callback_query(F.data == "back_to_start")
 async def back_to_start(callback: CallbackQuery, bot: Bot):
     """Go back to start message - fast text only."""
@@ -114,8 +88,7 @@ async def back_to_start(callback: CallbackQuery, bot: Bot):
     
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="📢 Join Channel", url=CHANNEL_URL),
-            InlineKeyboardButton(text="👨‍💻 Developer", url=DEV_URL)
+            InlineKeyboardButton(text="📢 Join Channel", url=CHANNEL_URL)
         ],
         [InlineKeyboardButton(text="⚙️ Settings", callback_data="settings")]
     ])
@@ -170,20 +143,12 @@ async def update_thumbnail_prompt(callback: CallbackQuery, state: FSMContext, bo
     )
     await callback.answer()
 
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 @router.callback_query(F.data == "cancel_update")
 async def cancel_update(callback: CallbackQuery, state: FSMContext, bot: Bot):
     """Cancel the thumbnail update."""
     await state.clear()
     await show_settings(callback, bot)
 
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 @router.message(ThumbnailState.waiting_for_thumbnail, F.photo)
 async def receive_thumbnail(message: types.Message, state: FSMContext):
     """Save the received photo as thumbnail."""
@@ -203,11 +168,6 @@ async def receive_thumbnail(message: types.Message, state: FSMContext):
         parse_mode="HTML",
         reply_markup=keyboard
     )
-
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 @router.callback_query(F.data == "view_thumb")
 async def view_thumbnail(callback: CallbackQuery, bot: Bot):
     """Show the user's current thumbnail."""
@@ -241,10 +201,6 @@ async def view_thumbnail(callback: CallbackQuery, bot: Bot):
         )
     await callback.answer()
 
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 @router.callback_query(F.data == "remove_thumb")
 async def remove_thumbnail_handler(callback: CallbackQuery, bot: Bot):
     """Remove the user's thumbnail."""
@@ -289,11 +245,6 @@ async def close_settings(callback: CallbackQuery):
         pass
     await callback.answer(small_caps("Settings closed"))
 
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
-
 # ==================== AUTO THUMBNAIL UPDATE ====================
 # When user sends a photo (not in any state), auto-update their thumbnail
 
@@ -326,7 +277,3 @@ async def auto_update_thumbnail(message: types.Message, state: FSMContext):
         f"<blockquote>{small_caps('Your videos will now use this cover image.')}</blockquote>",
         parse_mode="HTML"
     )
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
