@@ -3,11 +3,8 @@
 <p align="center">
     <b>A powerful Telegram bot to add custom thumbnails to your videos instantly.</b>
     <br>
-    <a href="https://t.me/cantarellabots">
+    <a href="https://t.me/Sujan_BotZ">
         <img src="https://img.shields.io/badge/Channel-CantarellaBots-blue?style=flat-square&logo=telegram" alt="Channel">
-    </a>
-    <a href="https://t.me/cantarella_wuwa">
-        <img src="https://img.shields.io/badge/Developer-cantarella__wuwa-blue?style=flat-square&logo=telegram" alt="Developer">
     </a>
 </p>
 
@@ -26,7 +23,7 @@
 
 ### 💜 Heroku
 <p>
-<a href="https://heroku.com/deploy?template=https://github.com/cantarella-wuwa/thumbnail-bot">
+<a href="https://heroku.com/deploy?template=[https://github.com/xyzcinema/Auto-Caption-Pro]">
   <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
 </a>
 </p>
@@ -50,18 +47,6 @@
 3. Select Docker deployment.
 4. Add Environment Variables.
 5. Deploy!
-
-### 🐳 Docker
-```bash
-docker build -t cantarellabots-thumbnail-bot .
-docker run --env-file .env cantarellabots-thumbnail-bot
-```
-
-### 💻 Local
-```bash
-pip install -r requirements.txt
-python main.py
-```
 
 ## ⚙️ Configuration
 
@@ -102,11 +87,3 @@ thumbnail-bot/
 ├── Procfile
 └── requirements.txt
 ```
-
-## 👨‍💻 Credits
-- **Developer**: [@cantarella_wuwa](https://t.me/cantarella_wuwa)
-- **Channel**: [Cantarella Bots](https://t.me/cantarellabots)
-- **Helper**: [@yato](https://github.com/ProYato)
-<p align="center">
-  <b>⭐ Star this repo if you like it!</b>
-</p>
