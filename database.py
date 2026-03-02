@@ -71,17 +71,9 @@ async def get_user(user_id: int) -> Optional[Dict[str, Any]]:
     """Get user data."""
     return await db.users.find_one({"user_id": user_id})
 
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 async def get_all_users() -> List[Dict[str, Any]]:
     """Get all users."""
     return await db.users.find().to_list(length=None)
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 
 async def get_user_count() -> int:
     """Get total user count."""
@@ -107,10 +99,6 @@ async def remove_thumbnail(user_id: int) -> bool:
         {"$set": {"thumbnail_file_id": None}}
     )
     return result.modified_count > 0
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 
 # ==================== USAGE TRACKING ====================
 
@@ -121,20 +109,12 @@ async def increment_usage(user_id: int):
         {"$inc": {"usage_count": 1}}
     )
 
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 async def get_leaderboard(limit: int = 10) -> List[Dict[str, Any]]:
     """Get top users by usage count."""
     return await db.users.find(
         {"usage_count": {"$gt": 0}}
     ).sort("usage_count", -1).limit(limit).to_list(length=limit)
 
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 # ==================== BAN FUNCTIONS ====================
 
 async def ban_user(user_id: int) -> bool:
@@ -145,10 +125,6 @@ async def ban_user(user_id: int) -> bool:
     )
     return result.modified_count > 0
 
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschats
 async def unban_user(user_id: int) -> bool:
     """Unban a user."""
     result = await db.users.update_one(
@@ -166,10 +142,6 @@ async def is_banned(user_id: int) -> bool:
     user = await db.users.find_one({"user_id": user_id})
     return user.get("banned", False) if user else False
 
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 # ==================== CAPTION FUNCTIONS ====================
 
 async def set_auto_caption(user_id: int, enabled: bool):
@@ -220,10 +192,6 @@ async def get_show_extension(user_id: int) -> bool:
     user = await db.users.find_one({"user_id": user_id})
     return user.get("show_extension", True) if user else True
 
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 # ==================== ADMIN FUNCTIONS ====================
 
 async def add_admin(user_id: int):
@@ -233,21 +201,12 @@ async def add_admin(user_id: int):
         {"$set": {"user_id": user_id}},
         upsert=True
     )
-
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 async def remove_admin(user_id: int) -> bool:
     """Remove an admin."""
     if user_id == OWNER_ID:
         return False  # Cannot remove owner
     result = await db.admins.delete_one({"user_id": user_id})
     return result.deleted_count > 0
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 
 async def is_admin(user_id: int) -> bool:
     """Check if user is admin."""
@@ -256,15 +215,7 @@ async def is_admin(user_id: int) -> bool:
     admin = await db.admins.find_one({"user_id": user_id})
     return admin is not None
 
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 async def get_all_admins() -> List[int]:
     """Get all admin IDs."""
     admins = await db.admins.find().to_list(length=None)
     return [a["user_id"] for a in admins]
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
