@@ -1,28 +1,12 @@
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 from aiogram import Router, types, F, Bot
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 from config import LOG_CHANNEL
 from database import (
     get_thumbnail, increment_usage, is_banned, add_user,
     get_auto_caption, get_caption_format,
     get_replace_underscores, get_show_extension
 )
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 router = Router()
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 
 def small_caps(text: str) -> str:
     """Convert text to small caps unicode."""
@@ -63,11 +47,6 @@ def generate_caption(caption_format: str, filename: str,
     caption = caption_format.replace("{filename}", formatted_filename)
     
     return caption
-
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 
 @router.message(F.video)
 async def handle_video(message: types.Message, bot: Bot):
@@ -152,7 +131,3 @@ async def handle_video(message: types.Message, bot: Bot):
             parse_mode="HTML",
             reply_markup=keyboard
         )
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
