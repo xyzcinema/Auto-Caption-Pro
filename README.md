@@ -4,7 +4,7 @@
     <b>A powerful Telegram bot to add custom thumbnails to your videos instantly.</b>
     <br>
     <a href="https://t.me/Sujan_BotZ">
-        <img src="https://img.shields.io/badge/Channel-CantarellaBots-blue?style=flat-square&logo=telegram" alt="Channel">
+        <img src="https://img.shields.io/badge/Channel-Sujan_BotZ-blue?style=flat-square&logo=telegram" alt="Channel">
     </a>
 </p>
 
