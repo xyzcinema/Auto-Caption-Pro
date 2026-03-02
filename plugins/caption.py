@@ -1,41 +1,19 @@
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 from aiogram import Router, types, F, Bot
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 from database import (
     is_banned, set_auto_caption, get_auto_caption,
     set_caption_format, get_caption_format,
     set_replace_underscores, get_replace_underscores,
     set_show_extension, get_show_extension
 )
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 router = Router()
-
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 
 class CaptionState(StatesGroup):
     waiting_for_caption_format = State()
-
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 
 def small_caps(text: str) -> str:
     """Convert text to small caps unicode."""
@@ -104,10 +82,6 @@ def generate_caption(caption_format: str, filename: str,
     
     return caption
 
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 
 @router.callback_query(F.data == "caption_settings")
 async def show_caption_settings(callback: CallbackQuery, bot: Bot):
@@ -183,7 +157,6 @@ async def show_set_caption_format(callback: CallbackQuery, bot: Bot):
         f"<code>/setcaption &lt;b&gt;{{filename}}&lt;/b&gt;</code>\n"
         f"<code>/setcaption 📁 &lt;code&gt;{{filename}}&lt;/code&gt;</code>\n"
         f"<code>/setcaption &lt;b&gt;🎬 {{filename}}&lt;/b&gt; | &lt;a href='https://t.me/yourchannel'&gt;Join&lt;/a&gt;</code>\n"
-        f"<code>/setcaption &lt;i&gt;{{filename}}&lt;/i&gt; | Size: 1080p</code>"
         f"</blockquote>\n\n"
         f"{small_caps('Send')} <code>/setcaption &lt;your format&gt;</code> {small_caps('to set')}."
     )
@@ -360,8 +333,3 @@ async def toggle_extension_handler(callback: CallbackQuery, bot: Bot):
     await set_show_extension(user_id, not current)
     await show_extension_menu(callback, bot)
     await callback.answer("Setting updated!")
-
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
