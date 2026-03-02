@@ -1,25 +1,9 @@
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 from aiogram import Router, types, Bot
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, URLInputFile
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 from config import CHANNEL_URL, DEV_URL, get_random_pic, LOG_CHANNEL
 from database import add_user, is_banned, get_user
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 router = Router()
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 
 def small_caps(text: str) -> str:
     """Convert text to small caps unicode."""
@@ -34,10 +18,6 @@ def small_caps(text: str) -> str:
             result += char
     return result
 
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
 @router.message(Command("start"))
 async def start_cmd(message: types.Message, bot: Bot):
     """Handle /start command with image and buttons."""
@@ -86,8 +66,7 @@ async def start_cmd(message: types.Message, bot: Bot):
     # Buttons
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="📢 Join Channel", url=CHANNEL_URL),
-            InlineKeyboardButton(text="👨‍💻 Developer", url=DEV_URL)
+            InlineKeyboardButton(text="📢 Join Channel", url=CHANNEL_URL)
         ],
         [InlineKeyboardButton(text="⚙️ Settings", callback_data="settings")]
     ])
@@ -116,10 +95,3 @@ async def start_cmd(message: types.Message, bot: Bot):
         parse_mode="HTML",
         reply_markup=keyboard
     )
-# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat# CantarellaBots
-# Don't Remove Credit
-# Telegram Channel @CantarellaBots
-#Supoort group @rexbotschat
